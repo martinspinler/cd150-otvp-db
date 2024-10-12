@@ -205,24 +205,26 @@ def create_app(test_config=None):
     except OSError:
         pass
 
-    @app.route('/hello')
+    @app.route('/dpush')
     def hello():
-        data = bytes.fromhex(request.query_string.decode())
-        pkt = []
-        for n in data:
-            if n & 0xF0 == 0xB0:
-                if pkt:
-                    if 0:
-                        print("Unfinished packet", pkt)
-                pkt = []
-            pkt += [(n >> 0) & 0xF, (n >> 4) & 0xF]
-            if n & 0xF0 == 0x20:
-                #print("Data:", pkt)
-                song = parse_input(pkt)
-                insert_db_row(song)
-                print("Song:", song)
+        if 'data' in request.args:
+            #data = bytes.fromhex(request.query_string.decode())
+            data = bytes.fromhex(request.args['data'])
+            pkt = []
+            for n in data:
+                if n & 0xF0 == 0xB0:
+                    if pkt:
+                        if 0:
+                            print("Unfinished packet", pkt)
+                    pkt = []
+                pkt += [(n >> 0) & 0xF, (n >> 4) & 0xF]
+                if n & 0xF0 == 0x20:
+                    #print("Data:", pkt)
+                    song = parse_input(pkt)
+                    insert_db_row(song)
+                    print("Song:", song)
 
-                pkt = []
+                    pkt = []
 
         return 'OK\n'
 
