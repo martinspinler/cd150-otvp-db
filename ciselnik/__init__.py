@@ -82,7 +82,7 @@ class Song:
 
 
 def getdb():
-    dbcon = sqlite3.connect("ciselnik/ciselnik.db")
+    dbcon = sqlite3.connect("ciselnik.db")
     return dbcon
 
 
