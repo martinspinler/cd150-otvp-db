@@ -11,7 +11,7 @@
 #include "secrets.h"
 
 
-static uint8_t buffer[32];
+static uint8_t buffer[128];
 static uint8_t buffer_pos = 0;
 
 WiFiMulti WiFiMulti;
@@ -34,11 +34,8 @@ void setup()
 
 int send_buffer(uint8_t *buffer, uint8_t buffer_pos, int retries)
 {
-
-    static const char *request_prefix = "GET /dpush?";
-
+    static const char *request_prefix = "GET /dpush?data=";
     static char req[128];
-
     int maxloops = 0;
 
     WiFiClient client;
@@ -55,9 +52,9 @@ int send_buffer(uint8_t *buffer, uint8_t buffer_pos, int retries)
 
     client.print(req);
 
-    while (!client.available() && maxloops < 2000) {
+    while (!client.available() && maxloops < 200) {
         maxloops++;
-        delay(1);
+        delay(10);
     }
 
     client.stop();
@@ -74,14 +71,14 @@ void loop()
         /*if (c & 0xF0 == 0xB0) {
             bufffer_pos = 0;
         }*/
-        if (buffer_pos >= 32)
+        if (buffer_pos >= sizeof(buffer))
             buffer_pos = 0;
 
         buffer[buffer_pos] = c;
         buffer_pos += 1;
 
-        if (c & 0xF0 == 0x20) {
-            n = 3;
+        if ((c & 0xF0) == 0x20 || c == 0xD8 || c == 0xD9) {
+            n = 10;
             do {
                 n = send_buffer(buffer, buffer_pos, n);
             } while (n > 0);
