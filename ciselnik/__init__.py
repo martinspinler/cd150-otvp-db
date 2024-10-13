@@ -208,8 +208,11 @@ def create_app(test_config=None):
     @app.route('/dpush')
     def hello():
         if 'data' in request.args:
-            #data = bytes.fromhex(request.query_string.decode())
             data = bytes.fromhex(request.args['data'])
+        else:
+            data = bytes.fromhex(request.query_string.decode())
+
+        if data:
             pkt = []
             for n in data:
                 if n & 0xF0 == 0xB0:
